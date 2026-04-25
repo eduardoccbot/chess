@@ -8,14 +8,19 @@
     :root {
       --board-light: #f0d9b5;
       --board-dark: #b58863;
-      --highlight: rgba(255, 255, 0, 0.4);
+      --highlight: rgba(255, 255, 0, 0.45);
+      --highlight2: rgba(0, 180, 0, 0.4);
+      --highlight3: rgba(255, 100, 0, 0.35);
       --selected: rgba(0, 100, 200, 0.35);
       --check: rgba(255, 0, 0, 0.5);
       --bg: #1a1a2e;
       --panel: #16213e;
+      --panel2: #1f2b50;
       --text: #eaeaea;
       --accent: #e94560;
       --muted: #8892a0;
+      --green: #2ecc71;
+      --amber: #f39c12;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -36,7 +41,35 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    .subtitle { color: var(--muted); font-size: 0.85rem; margin-bottom: 1.5rem; }
+    .subtitle { color: var(--muted); font-size: 0.85rem; margin-bottom: 1rem; }
+
+    /* Mode toggle */
+    .mode-toggle {
+      display: flex;
+      background: var(--panel);
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(255,255,255,0.06);
+      gap: 4px;
+    }
+    .mode-btn {
+      padding: 0.5rem 1.5rem;
+      border-radius: 7px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .mode-btn.active {
+      background: var(--accent);
+      color: #fff;
+    }
+    .mode-btn:hover:not(.active) { background: rgba(255,255,255,0.06); color: var(--text); }
 
     .game-container {
       display: flex;
@@ -92,11 +125,33 @@
       background: var(--highlight);
       pointer-events: none;
     }
+    .square.hint-move::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: var(--highlight2);
+      pointer-events: none;
+      border-radius: 50%;
+      width: 22px; height: 22px;
+      margin: auto;
+    }
+    .square.hint-capture::after {
+      content: '';
+      position: absolute; inset: 4px;
+      border: 4px solid var(--highlight3);
+      border-radius: 50%;
+      pointer-events: none;
+    }
     .square.check { background: var(--check) !important; }
     .square.enpassant::after {
       content: '';
       position: absolute; inset: 0;
       background: rgba(0,0,0,0.12);
+      pointer-events: none;
+    }
+    .square.lesson-hint::after {
+      content: '';
+      position: absolute; inset: 0;
+      box-shadow: inset 0 0 0 3px var(--green);
       pointer-events: none;
     }
     .square svg { width: 54px; height: 54px; }
@@ -115,8 +170,11 @@
       cursor: pointer;
       font-size: 0.85rem;
       transition: all 0.2s;
+      font-family: inherit;
     }
     button:hover { background: var(--accent); border-color: var(--accent); }
+    button.green { background: var(--green); border-color: var(--green); color: #fff; font-weight: 600; }
+    button.green:hover { background: #27ae60; border-color: #27ae60; }
 
     .sidebar {
       background: var(--panel);
@@ -202,14 +260,176 @@
     }
     .game-over-card h2 { font-size: 2rem; margin-bottom: 0.5rem; }
     .game-over-card p { color: var(--muted); margin-bottom: 1.5rem; }
+
+    /* ─── LEARN MODE ─────────────────────────────────────────────────── */
+    .learn-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(10,10,20,0.92);
+      z-index: 300;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+    .learn-overlay.active { display: flex; }
+
+    .learn-panel {
+      background: var(--panel);
+      border-radius: 18px;
+      padding: 2rem;
+      max-width: 700px;
+      width: 95%;
+      max-height: 90vh;
+      overflow-y: auto;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    }
+    .learn-panel h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.25rem;
+    }
+    .learn-panel .lesson-tag {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.7rem;
+      padding: 2px 10px;
+      border-radius: 20px;
+      margin-bottom: 1rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .learn-panel p {
+      color: #c8d0da;
+      line-height: 1.7;
+      font-size: 0.95rem;
+      margin-bottom: 0.75rem;
+    }
+    .learn-panel strong { color: var(--text); }
+    .learn-panel .tip-box {
+      background: rgba(46,204,113,0.12);
+      border-left: 3px solid var(--green);
+      border-radius: 0 6px 6px 0;
+      padding: 0.75rem 1rem;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+    .learn-panel .tip-box .tip-title {
+      color: var(--green);
+      font-weight: 700;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      margin-bottom: 0.3rem;
+    }
+    .learn-panel .piece-intro {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin: 1.2rem 0;
+      background: rgba(255,255,255,0.04);
+      border-radius: 10px;
+      padding: 1rem;
+    }
+    .learn-panel .piece-intro .piece-icon { font-size: 52px; line-height: 1; }
+    .learn-panel .piece-intro .piece-info h3 { font-size: 1.1rem; margin-bottom: 0.3rem; }
+    .learn-panel .piece-intro .piece-info p { margin: 0; font-size: 0.88rem; }
+    .learn-panel .moves-demo {
+      font-family: 'Courier New', monospace;
+      background: rgba(0,0,0,0.3);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin: 0.75rem 0;
+      font-size: 0.85rem;
+      color: #a0d8ef;
+    }
+    .learn-panel .moves-demo .arrow { color: var(--amber); margin: 0 0.3rem; }
+    .learn-btn-row { display: flex; gap: 0.75rem; margin-top: 1.5rem; flex-wrap: wrap; }
+    .learn-progress {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .learn-progress .pip {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      transition: background 0.3s;
+    }
+    .learn-progress .pip.done { background: var(--green); }
+    .learn-progress .pip.current { background: var(--amber); }
+    .lesson-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+    .lesson-card {
+      background: var(--panel2);
+      border-radius: 10px;
+      padding: 1rem;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .lesson-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .lesson-card .lesson-num {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+    }
+    .lesson-card .lesson-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.25rem; }
+    .lesson-card .lesson-desc { font-size: 0.78rem; color: var(--muted); }
+    .lesson-card .lesson-done-check {
+      float: right;
+      color: var(--green);
+      font-size: 1.1rem;
+    }
+
+    .feedback-banner {
+      display: none;
+      border-radius: 10px;
+      padding: 0.85rem 1.2rem;
+      margin-top: 1rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      animation: popIn 0.3s ease;
+    }
+    .feedback-banner.success {
+      display: block;
+      background: rgba(46,204,113,0.18);
+      border: 1px solid var(--green);
+      color: var(--green);
+    }
+    .feedback-banner.error {
+      display: block;
+      background: rgba(231,76,60,0.18);
+      border: 1px solid #e74c3c;
+      color: #e74c3c;
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.95); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
 
 <h1>♔ Chess</h1>
-<p class="subtitle">Two-player chess — eduardoccbot/chess</p>
+<p class="subtitle">Two-player chess — <a href="https://github.com/eduardoccbot/chess" style="color:var(--muted);">eduardoccbot/chess</a></p>
 
-<div class="game-container">
+<div class="mode-toggle">
+  <button class="mode-btn active" id="btnPlay" onclick="setMode('play')">♟ Play</button>
+  <button class="mode-btn" id="btnLearn" onclick="setMode('learn')">📖 Learn</button>
+</div>
+
+<div class="game-container" id="playView">
   <div>
     <div class="status-bar">
       <div class="turn" id="statusText">
@@ -244,6 +464,27 @@
   </div>
 </div>
 
+<!-- Learn Mode View -->
+<div class="game-container hidden" id="learnView">
+  <div>
+    <div class="status-bar">
+      <div class="turn" id="learnStatus">📖 Learn Mode</div>
+    </div>
+    <div id="learnBoard"></div>
+    <div class="controls">
+      <button onclick="resetLesson()">↻ Try Again</button>
+      <button class="green" onclick="nextLesson()">Next →</button>
+    </div>
+    <div class="feedback-banner" id="feedbackBanner"></div>
+  </div>
+
+  <div class="sidebar" style="max-width:320px;">
+    <h3>Lesson Progress</h3>
+    <div class="learn-progress" id="learnProgress"></div>
+    <div class="lesson-list" id="lessonList"></div>
+  </div>
+</div>
+
 <div class="promotion-modal" id="promotionModal">
   <div class="promotion-panel">
     <h3>Promote Pawn</h3>
@@ -259,6 +500,11 @@
   </div>
 </div>
 
+<!-- Learn overlay (lesson content) -->
+<div class="learn-overlay" id="learnOverlay">
+  <div class="learn-panel" id="learnPanelContent"></div>
+</div>
+
 <script>
 // ─── Piece SVGs (standard WFP style) ─────────────────────────────────────────
 const SVG = {
@@ -270,18 +516,30 @@ const SVG = {
   P: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45"><path d="M22.5 9c-2.21 0-4 1.79-4 4 0 .89.29 1.71.78 2.38C17.33 16.5 16 18.59 16 21c0 2.03.94 3.84 2.41 5.03-3 1.06-7.41 5.55-7.41 13.47h23c0-7.92-4.41-12.41-7.41-13.47 1.47-1.19 2.41-3 2.41-5.03 0-2.41-1.33-4.5-3.28-5.62.49-.67.78-1.49.78-2.38 0-2.21-1.79-4-4-4z" fill="#fff" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>`,
 };
 
-// Black piece SVGs — same shapes, darker fill
+// Black piece SVGs
 const BSVG = {};
 Object.keys(SVG).forEach(k => {
   BSVG[k.toLowerCase()] = SVG[k].replace(/fill="#fff"/g, 'fill="#1a1a1a"').replace(/stroke="#fff"/g, 'stroke="#1a1a1a"');
 });
 
-const PIECES = { K:'♔', Q:'♕', R:'♖', B:'♗', N:'♘', P:'♙',
-                 k:'♚', q:'♛', r:'♜', b:'♝', n:'♞', p:'♟' };
 const PIECE_SVG = { K: SVG.K, Q: SVG.Q, R: SVG.R, B: SVG.B, N: SVG.N, P: SVG.P,
                     k: BSVG.k, q: BSVG.q, r: BSVG.r, b: BSVG.b, n: BSVG.n, p: BSVG.p };
 
-// ─── Board State ─────────────────────────────────────────────────────────────
+// ─── Mode Management ──────────────────────────────────────────────────────────
+let currentMode = 'play';
+
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('btnPlay').classList.toggle('active', mode === 'play');
+  document.getElementById('btnLearn').classList.toggle('active', mode === 'learn');
+  document.getElementById('playView').classList.toggle('hidden', mode !== 'play');
+  document.getElementById('learnView').classList.toggle('hidden', mode !== 'learn');
+  if (mode === 'learn') {
+    showLessonList();
+  }
+}
+
+// ─── PLAY MODE ───────────────────────────────────────────────────────────────
 let board, turn, selected, enPassant, halfMoveClock, fullMoveNumber;
 let moveHistory, capturedWhite, capturedBlack;
 let gameOver, promotionPending, lastFrom;
@@ -299,7 +557,7 @@ function init() {
   ];
   turn = 'white';
   selected = null;
-  enPassant = null; // { row, col }
+  enPassant = null;
   halfMoveClock = 0;
   fullMoveNumber = 1;
   moveHistory = [];
@@ -318,7 +576,6 @@ function init() {
 
 // ─── Move generation helpers ─────────────────────────────────────────────────
 function pieceColor(p) { return p && p === p.toUpperCase() ? 'white' : 'black'; }
-
 function inBounds(r, c) { return r >= 0 && r < 8 && c >= 0 && c < 8; }
 
 function getMoves(row, col) {
@@ -328,7 +585,6 @@ function getMoves(row, col) {
   const type = piece.toUpperCase();
   const moves = [];
   const add = (r, c) => { if (inBounds(r,c) && pieceColor(board[r][c]) !== color) moves.push([r,c]); };
-
   const slide = (dir) => {
     for (const [dr, dc] of dir) {
       for (let i = 1; i < 8; i++) {
@@ -339,16 +595,13 @@ function getMoves(row, col) {
       }
     }
   };
-
   if (type === 'P') {
     const dir = color === 'white' ? -1 : 1;
     const startRow = color === 'white' ? 6 : 1;
-    // Forward
     if (inBounds(row+dir,col) && !board[row+dir][col]) {
       moves.push([row+dir,col]);
       if (row === startRow && !board[row+2*dir][col]) moves.push([row+2*dir,col]);
     }
-    // Captures
     for (const dc of [-1,1]) {
       const nr = row+dir, nc = col+dc;
       if (inBounds(nr,nc)) {
@@ -356,26 +609,18 @@ function getMoves(row, col) {
         else if (enPassant && enPassant.row === nr && enPassant.col === nc) moves.push([nr,nc]);
       }
     }
-  } else if (type === 'N') {
-    for (const [dr,dc] of [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]]) add(row+dr,col+dc);
-  } else if (type === 'B') slide([[-1,-1],[-1,1],[1,-1],[1,1]]);
+  } else if (type === 'N') { for (const [dr,dc] of [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]]) add(row+dr,col+dc); }
+  else if (type === 'B') slide([[-1,-1],[-1,1],[1,-1],[1,1]]);
   else if (type === 'R') slide([[-1,0],[1,0],[0,-1],[0,1]]);
   else if (type === 'Q') slide([[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]]);
   else if (type === 'K') {
     for (const [dr,dc] of [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]]) add(row+dr,col+dc);
-    // Castling
     const rowK = color === 'white' ? 7 : 0;
     if (row === rowK && col === 4 && !isInCheck(color)) {
-      if (!board[rowK][5] && !board[rowK][6] && !board[rowK][7] &&
-          pieceColor(board[rowK][7]) === color && board[rowK][7].toUpperCase() === 'R' &&
-          !isSquareAttacked(rowK,5,color) && !isSquareAttacked(rowK,6,color)) {
-        moves.push([rowK,6,'castle']);
-      }
-      if (!board[rowK][1] && !board[rowK][2] && !board[rowK][3] &&
-          pieceColor(board[rowK][0]) === color && board[rowK][0].toUpperCase() === 'R' &&
-          !isSquareAttacked(rowK,2,color) && !isSquareAttacked(rowK,3,color)) {
-        moves.push([rowK,2,'castle']);
-      }
+      if (!board[rowK][5] && !board[rowK][6] && !board[rowK][7] && pieceColor(board[rowK][7]) === color && board[rowK][7].toUpperCase() === 'R' &&
+          !isSquareAttacked(rowK,5,color) && !isSquareAttacked(rowK,6,color)) moves.push([rowK,6,'castle']);
+      if (!board[rowK][1] && !board[rowK][2] && !board[rowK][3] && pieceColor(board[rowK][0]) === color && board[rowK][0].toUpperCase() === 'R' &&
+          !isSquareAttacked(rowK,2,color) && !isSquareAttacked(rowK,3,color)) moves.push([rowK,2,'castle']);
     }
   }
   return moves;
@@ -394,7 +639,6 @@ function isSquareAttacked(row, col, byColor) {
   return false;
 }
 
-// Raw moves without castle consideration
 function getMovesRaw(row, col) {
   const piece = board[row][col];
   if (!piece) return [];
@@ -458,7 +702,6 @@ function getLegalMoves(row, col) {
   const legal = [];
   for (const mv of getMoves(row, col)) {
     const [nr, nc, flag] = mv;
-    // Simulate move
     const backup = board[nr][nc];
     const backupEP = enPassant;
     const captured = board[nr][nc];
@@ -468,13 +711,11 @@ function getLegalMoves(row, col) {
       if (nc === 6) { board[row][5] = board[row][7]; board[row][7] = null; }
       else { board[row][3] = board[row][0]; board[row][0] = null; }
     }
-    // En passant capture
     if (piece.toUpperCase() === 'P' && enPassant && nr === enPassant.row && nc === enPassant.col) {
       const captureRow = pieceColor(piece) === 'white' ? nr+1 : nr-1;
       board[captureRow][nc] = null;
     }
     const inCheck = isInCheck(pieceColor(piece));
-    // Undo
     board[row][col] = piece;
     board[nr][nc] = captured;
     if (flag === 'castle') {
@@ -491,29 +732,11 @@ function getLegalMoves(row, col) {
   return legal;
 }
 
-// ─── Algebraic notation ───────────────────────────────────────────────────────
-const FILES = 'abcdefgh';
-function toAlgebraic(row, col) { return FILES[col] + (8-row); }
-
-function getMoveNotation(fromRow, fromCol, toRow, toCol, piece, flag, capture) {
-  if (flag === 'castle') return toCol === 6 ? 'O-O' : 'O-O-O';
-  let nota = '';
-  const type = piece.toUpperCase();
-  if (type !== 'P') nota += type;
-  if (capture) {
-    if (type === 'P') nota += FILES[fromCol];
-    nota += 'x';
-  }
-  nota += toAlgebraic(toRow, toCol);
-  return nota;
-}
-
 // ─── Render ───────────────────────────────────────────────────────────────────
 function renderBoard() {
   const boardEl = document.getElementById('board');
   boardEl.innerHTML = '';
   const inCheckPos = isInCheck(turn) ? findKing(turn) : null;
-
   for (let row = 0; row < 8; row++) {
     for (let col = 0; col < 8; col++) {
       const square = document.createElement('div');
@@ -521,29 +744,15 @@ function renderBoard() {
       square.className = `square ${isLight ? 'light' : 'dark'}`;
       square.dataset.row = row;
       square.dataset.col = col;
-
-      if (selected && selected[0] === row && selected[1] === col)
-        square.classList.add('selected');
-
-      if (inCheckPos && inCheckPos[0] === row && inCheckPos[1] === col)
-        square.classList.add('check');
-
-      if (enPassant && enPassant.row === row && enPassant.col === col)
-        square.classList.add('enpassant');
-
+      if (selected && selected[0] === row && selected[1] === col) square.classList.add('selected');
+      if (inCheckPos && inCheckPos[0] === row && inCheckPos[1] === col) square.classList.add('check');
+      if (enPassant && enPassant.row === row && enPassant.col === col) square.classList.add('enpassant');
       if (selected) {
         const legal = getLegalMoves(selected[0], selected[1]);
-        if (legal.some(([r,c]) => r === row && c === col)) {
-          if (!board[row][col]) square.classList.add('highlighted');
-          else square.classList.add('highlighted');
-        }
+        if (legal.some(([r,c]) => r === row && c === col)) square.classList.add('highlighted');
       }
-
       const piece = board[row][col];
-      if (piece) {
-        square.innerHTML = PIECE_SVG[piece];
-      }
-
+      if (piece) square.innerHTML = PIECE_SVG[piece];
       square.addEventListener('click', () => onSquareClick(row, col));
       boardEl.appendChild(square);
     }
@@ -551,16 +760,10 @@ function renderBoard() {
 }
 
 function updateStatus() {
-  const dot = turn === 'white'
-    ? '<span class="dot white"></span> White'
-    : '<span class="dot black"></span> Black';
-  if (gameOver) {
-    document.getElementById('statusText').innerHTML = 'Game over';
-  } else if (isInCheck(turn)) {
-    document.getElementById('statusText').innerHTML = `${dot} — Check!`;
-  } else {
-    document.getElementById('statusText').innerHTML = `${dot} to move`;
-  }
+  const dot = turn === 'white' ? '<span class="dot white"></span> White' : '<span class="dot black"></span> Black';
+  if (gameOver) document.getElementById('statusText').innerHTML = 'Game over';
+  else if (isInCheck(turn)) document.getElementById('statusText').innerHTML = `${dot} — Check!`;
+  else document.getElementById('statusText').innerHTML = `${dot} to move`;
   document.getElementById('whiteStatus').textContent = isInCheck('white') ? '♚ In check' : '♚ —';
   document.getElementById('blackStatus').textContent = isInCheck('black') ? '♚ In check' : '♚ —';
 }
@@ -570,49 +773,31 @@ function updateMoveList() {
   el.innerHTML = '';
   for (let i = 0; i < moveHistory.length; i += 2) {
     const num = Math.floor(i/2) + 1;
-    const w = moveHistory[i] || '';
-    const b = moveHistory[i+1] || '';
     const row = document.createElement('div');
     row.className = 'move-row';
-    row.innerHTML = `<span class="move-num">${num}.</span>
-      <span class="move">${w}</span><span class="move">${b}</span>`;
+    row.innerHTML = `<span class="move-num">${num}.</span><span class="move">${moveHistory[i]||''}</span><span class="move">${moveHistory[i+1]||''}</span>`;
     el.appendChild(row);
   }
   el.scrollTop = el.scrollHeight;
 }
 
 function updateCaptured() {
-  document.getElementById('capturedWhite').innerHTML =
-    capturedWhite.map(p => `<span>${PIECE_SVG[p]}</span>`).join('');
-  document.getElementById('capturedBlack').innerHTML =
-    capturedBlack.map(p => `<span>${PIECE_SVG[p]}</span>`).join('');
+  document.getElementById('capturedWhite').innerHTML = capturedWhite.map(p => `<span>${PIECE_SVG[p]}</span>`).join('');
+  document.getElementById('capturedBlack').innerHTML = capturedBlack.map(p => `<span>${PIECE_SVG[p]}</span>`).join('');
 }
 
-function updateInfo() {
-  // nothing extra needed yet
-}
+function updateInfo() {}
 
-// ─── Interaction ─────────────────────────────────────────────────────────────
 function onSquareClick(row, col) {
   if (gameOver || promotionPending) return;
-
   const piece = board[row][col];
-
   if (selected) {
     const legal = getLegalMoves(selected[0], selected[1]);
     const mv = legal.find(([r,c]) => r === row && c === col);
-    if (mv) {
-      doMove(selected[0], selected[1], row, col, mv[2] || null);
-      selected = null;
-      return;
-    }
+    if (mv) { doMove(selected[0], selected[1], row, col, mv[2] || null); selected = null; return; }
   }
-
-  if (piece && pieceColor(piece) === turn) {
-    selected = [row, col];
-  } else {
-    selected = null;
-  }
+  if (piece && pieceColor(piece) === turn) selected = [row, col];
+  else selected = null;
   renderBoard();
 }
 
@@ -620,63 +805,37 @@ function doMove(fromRow, fromCol, toRow, toCol, flag) {
   const piece = board[fromRow][fromCol];
   const captured = board[toRow][toCol];
   const color = pieceColor(piece);
-
-  // En passant capture tracking
   let enPassantCapture = null;
   if (piece.toUpperCase() === 'P' && enPassant && toRow === enPassant.row && toCol === enPassant.col) {
     const captureRow = color === 'white' ? toRow+1 : toRow-1;
     enPassantCapture = board[captureRow][toCol];
     board[captureRow][toCol] = null;
   }
-
   board[toRow][toCol] = piece;
   board[fromRow][fromCol] = null;
-
-  // Castling rook move
   if (flag === 'castle') {
     if (toCol === 6) { board[toRow][5] = board[toRow][7]; board[toRow][7] = null; }
     else { board[toRow][3] = board[toRow][0]; board[toRow][0] = null; }
   }
-
-  // Track captured
-  if (captured) {
-    (pieceColor(captured) === 'white' ? capturedBlack : capturedWhite).push(captured);
-  }
-  if (enPassantCapture) {
-    (pieceColor(enPassantCapture) === 'white' ? capturedBlack : capturedWhite).push(enPassantCapture);
-  }
-
-  // Update en passant square
+  if (captured) (pieceColor(captured) === 'white' ? capturedBlack : capturedWhite).push(captured);
+  if (enPassantCapture) (pieceColor(enPassantCapture) === 'white' ? capturedBlack : capturedWhite).push(enPassantCapture);
   enPassant = null;
-  if (piece.toUpperCase() === 'P' && Math.abs(toRow - fromRow) === 2) {
-    enPassant = { row: (fromRow + toRow)/2, col: fromCol };
-  }
-
-  // Notation
-  const capture = captured || enPassantCapture;
-  const nota = getMoveNotation(fromRow, fromCol, toRow, toCol, piece, flag, !!capture);
-  if (color === 'white') {
-    moveHistory.push(nota);
-  } else {
-    moveHistory.push(nota);
-  }
-
-  // Check promotion
+  if (piece.toUpperCase() === 'P' && Math.abs(toRow - fromRow) === 2) enPassant = { row: (fromRow + toRow)/2, col: fromCol };
+  const FILES = 'abcdefgh';
+  const notation = flag === 'castle' ? (toCol === 6 ? 'O-O' : 'O-O-O') : `${piece.toUpperCase() !== 'P' ? piece.toUpperCase() : ''}${(captured || enPassantCapture) ? (piece.toUpperCase() === 'P' ? FILES[fromCol] : '') + 'x' : ''}${FILES[toCol]}${8-toRow}`;
+  moveHistory.push(notation);
   if (piece.toUpperCase() === 'P' && (toRow === 0 || toRow === 7)) {
     promotionPending = { row: toRow, col: toCol, color };
     showPromotion(toRow, toCol, color);
     return;
   }
-
   finishTurn();
 }
 
 function showPromotion(row, col, color) {
   const choices = document.getElementById('promotionChoices');
   const pieces = color === 'white' ? ['Q','R','B','N'] : ['q','r','b','n'];
-  choices.innerHTML = pieces.map(p =>
-    `<span onclick="choosePromotion('${p}')">${PIECE_SVG[p]}</span>`
-  ).join('');
+  choices.innerHTML = pieces.map(p => `<span onclick="choosePromotion('${p}')">${PIECE_SVG[p]}</span>`).join('');
   document.getElementById('promotionModal').classList.add('active');
 }
 
@@ -689,46 +848,22 @@ function choosePromotion(piece) {
 }
 
 function finishTurn() {
-  const prevTurn = turn;
   turn = turn === 'white' ? 'black' : 'white';
   if (turn === 'white') fullMoveNumber++;
-  halfMoveClock++;
-
-  // Check game end
-  if (isInCheck(turn)) {
-    if (isStalemate(turn)) {
-      endGame('stalemate');
-      return;
-    }
-  } else {
-    if (isStalemate(turn)) {
-      endGame('stalemate');
-      return;
-    }
-  }
-
-  // Checkmate detection
+  if (isInCheck(turn) && isStalemate(turn)) { endGame('stalemate'); return; }
+  if (isStalemate(turn)) { endGame('stalemate'); return; }
   let hasLegal = false;
   outer: for (let r = 0; r < 8; r++)
     for (let c = 0; c < 8; c++)
       if (board[r][c] && pieceColor(board[r][c]) === turn)
         if (getLegalMoves(r,c).length > 0) { hasLegal = true; break outer; }
-
-  if (!hasLegal) {
-    endGame(isInCheck(turn) ? 'checkmate' : 'stalemate');
-    return;
-  }
-
-  renderBoard();
-  updateStatus();
-  updateMoveList();
-  updateCaptured();
+  if (!hasLegal) { endGame(isInCheck(turn) ? 'checkmate' : 'stalemate'); return; }
+  renderBoard(); updateStatus(); updateMoveList(); updateCaptured();
 }
 
 function endGame(reason) {
   gameOver = true;
   const winner = turn === 'white' ? 'Black' : 'White';
-  const overlay = document.getElementById('gameOverOverlay');
   if (reason === 'checkmate') {
     document.getElementById('gameOverTitle').textContent = '♔ Checkmate!';
     document.getElementById('gameOverMsg').textContent = `${winner} wins by checkmate.`;
@@ -736,22 +871,570 @@ function endGame(reason) {
     document.getElementById('gameOverTitle').textContent = '½ – ½ Draw';
     document.getElementById('gameOverMsg').textContent = 'Stalemate — no legal moves.';
   }
-  overlay.classList.add('active');
-  renderBoard();
-  updateStatus();
+  document.getElementById('gameOverOverlay').classList.add('active');
+  renderBoard(); updateStatus();
 }
 
-function undoMove() {
-  if (moveHistory.length === 0) return;
-  // Simple undo: reset to initial and replay all but last move
-  // For a full undo we'd need move history with full state — for now just reset
-  // This is a limitation; a proper implementation would store full board states
-  // For now, restart is the only "proper" undo
-  resetGame();
+function undoMove() { resetGame(); }
+function resetGame() { init(); }
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// ─── LEARN MODE ──────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════════════
+
+// Completed lesson tracking (localStorage)
+function getDoneLessons() {
+  try { return JSON.parse(localStorage.getItem('chess_learn_done') || '{}'); }
+  catch { return {}; }
+}
+function markLessonDone(id) {
+  const d = getDoneLessons(); d[id] = true; localStorage.setItem('chess_learn_done', JSON.stringify(d));
 }
 
-function resetGame() {
-  init();
+// Lesson definitions
+const LESSONS = [
+  {
+    id: 1,
+    title: 'Welcome to Chess!',
+    module: 'Getting Started',
+    desc: 'Learn what chess is and why it\'s amazing',
+    content: `
+      <h2>♔ Welcome to Chess!</h2>
+      <span class="lesson-tag">Getting Started</span>
+      <p>Chess is one of the <strong>oldest and most beloved games in the world</strong> — played by millions of people in every country, from kids in school to world champions.</p>
+      <p>It's a game of <strong>strategy, imagination, and thinking ahead</strong>. No luck, no dice — just you, your ideas, and your opponent's ideas battling on the board.</p>
+      <div class="tip-box">
+        <div class="tip-title">💡 Good news!</div>
+        Chess takes minutes to learn but a lifetime to master. You've already taken the first step!
+      </div>
+      <p>Every chess game tells a <strong>story</strong>. In this course, we'll walk through the basics step by step — you'll be playing your first real game before you know it!</p>
+      <div class="moves-demo">
+        ♚ The goal: <strong>Trap the opponent's King</strong> so it can't escape.<br>
+        ♜ The first player to checkmate their opponent wins!
+      </div>
+    `,
+    setup: null, instruction: null, action: null, expectFrom: null, expectTo: null
+  },
+  {
+    id: 2,
+    title: 'The Board',
+    module: 'Getting Started',
+    desc: 'Understand the 8×8 grid and piece positions',
+    content: `
+      <h2>♟ The Chessboard</h2>
+      <span class="lesson-tag">Getting Started</span>
+      <p>A chessboard is a <strong>square grid of 64 squares</strong> — 8 rows and 8 columns. Each square has a name so we can describe where pieces are.</p>
+      <p>The <strong>files</strong> (columns) are named <strong>a–h</strong> from left to right. The <strong>ranks</strong> (rows) are named <strong>1–8</strong> from bottom to top.</p>
+      <div class="moves-demo">
+        a1 · b2 · c3 · d4 · e5 · f6 · g7 · h8 ↗<br>
+        The diagonal squares all have names!
+      </div>
+      <p>White always starts on <strong>ranks 1–2</strong>. Black always starts on <strong>ranks 7–8</strong>. The board is always oriented so that the white pieces are on the bottom.</p>
+      <div class="tip-box">
+        <div class="tip-title">📍 Remember!</div>
+        "White on right" — the rightmost corner square of each player's side should always be a light square.
+      </div>
+    `,
+    setup: null, instruction: null, action: null, expectFrom: null, expectTo: null
+  },
+  {
+    id: 3,
+    title: 'Meet the King & Queen',
+    module: 'Meet the Pieces',
+    desc: 'The two most powerful pieces on the board',
+    content: `
+      <h2>♔♕ Meet the King & Queen</h2>
+      <span class="lesson-tag">Meet the Pieces</span>
+      <p>These are the two most important pieces in chess!</p>
+      <div class="piece-intro">
+        <div class="piece-icon">♔</div>
+        <div class="piece-info">
+          <h3>The King ♔</h3>
+          <p>The <strong>most important piece</strong> in chess! If your King gets trapped (checkmate), you lose the game. The King can move <strong>one square in any direction</strong> — up, down, left, right, or diagonally.</p>
+        </div>
+      </div>
+      <div class="piece-intro">
+        <div class="piece-icon">♕</div>
+        <div class="piece-info">
+          <h3>The Queen ♕</h3>
+          <p>The <strong>most powerful piece</strong> on the board! She can move <strong>any number of squares in any direction</strong> — horizontally, vertically, or diagonally. She's like the King and Rook combined!</p>
+        </div>
+      </div>
+      <div class="moves-demo">
+        King: moves <span class="arrow">→</span> 1 square any direction<br>
+        Queen: moves <span class="arrow">→</span> any distance any direction
+      </div>
+      <div class="tip-box">
+        <div class="tip-title">💡 Pro tip!</div>
+        Protect your King! If your King is threatened (in "check"), you must get out of it on your next move.
+      </div>
+    `,
+    setup: null, instruction: null, action: null, expectFrom: null, expectTo: null
+  },
+  {
+    id: 4,
+    title: 'Meet the Rooks',
+    module: 'Meet the Pieces',
+    desc: 'The tall towers that move in straight lines',
+    content: `
+      <h2>♖ The Rook</h2>
+      <span class="lesson-tag">Meet the Pieces</span>
+      <p>The Rook (sometimes called the "Castle") looks like a <strong>tower</strong> and moves like one too!</p>
+      <div class="piece-intro">
+        <div class="piece-icon">♖</div>
+        <div class="piece-info">
+          <h3>The Rook ♖</h3>
+          <p>Rooks move in <strong>straight lines</strong> — horizontally or vertically — for <strong>any distance</strong>. They cannot jump over other pieces. Positioned in the corners at the start of the game.</p>
+        </div>
+      </div>
+      <p>Rooks are especially powerful when they can control <strong>open files</strong> (columns with no pawns blocking them). Two rooks working together can be devastating!</p>
+      <div class="moves-demo">
+        ♖ Moves: up · down · left · right — any number of squares!
+      </div>
+      <div class="tip-box">
+        <div class="tip-title">📍 Rook tip</div>
+        Try placing your rooks on files (columns) that are open or half-open — they'll control the whole board from there!
+      </div>
+    `,
+    setup: null, instruction: null, action: null, expectFrom: null, expectTo: null
+  },
+  {
+    id: 5,
+    title: 'Meet the Bishops',
+    module: 'Meet the Pieces',
+    desc: 'The diagonal sliders',
+    content: `
+      <h2>♗ The Bishop</h2>
+      <span class="lesson-tag">Meet the Pieces</span>
+      <p>Bishops are elegant pieces that <strong>slide diagonally</strong> across the board!</p>
+      <div class="piece-intro">
+        <div class="piece-icon">♗</div>
+        <div class="piece-info">
+          <h3>The Bishop ♗</h3>
+          <p>Bishops move <strong>any number of squares diagonally</strong> — they stay on the same color square for the entire game! Each player starts with <strong>two bishops</strong>, one on light squares and one on dark squares.</p>
+        </div>
+      </div>
+      <p>A bishop stuck on one color is called a "bad bishop." Try to keep both bishops active — they'll cover more of the board together!</p>
+      <div class="moves-demo">
+        ♗ Moves diagonally — light-squared bishop stays on light squares forever!
+      </div>
+      <div class="tip-box">
+        <div class="tip-title">💡 Bishop tip</div>
+        The bishop pair (both bishops working together) is very strong — they can reach any square on the board!
+      </div>
+    `,
+    setup: null, instruction: null, action: null, expectFrom: null, expectTo: null
+  },
+  {
+    id: 6,
+    title: 'Meet the Knights',
+    module: 'Meet the Pieces',
+    desc: 'The only piece that can jump over others',
+    content: `
+      <h2>♘ The Knight</h2>
+      <span class="lesson-tag">Meet the Pieces</span>
+      <p>Knights are the <strong>most unique piece</strong> in chess — they move in an "L" shape and are the <strong>only piece that can jump over others!</strong></p>
+      <div class="piece-intro">
+        <div class="piece-icon">♘</div>
+        <div class="piece-info">
+          <h3>The Knight ♘</h3>
+          <p>A knight moves in an <strong>"L" shape</strong>: 2 squares in one direction, then 1 square perpendicular to that. Think of it like moving two steps forward and one step sideways!</p>
+        </div>
+      </div>
+      <div class="moves-demo">
+        ♘ L-shape: 2 forward + 1 sideways! Can jump over pieces!
+      </div>
+      <div class="tip-box">
+        <div class="tip-title">💡 Knight tip</div>
+        Knights are strongest in the centre of the board, where they control the most squares. A knight in the corner only controls 2 squares!
+      </div>
+    `,
+    setup: null, instruction: null, action: null, expectFrom: null, expectTo: null
+  },
+  {
+    id: 7,
+    title: 'Meet the Pawns',
+    module: 'Meet the Pieces',
+    desc: 'Small but mighty — the backbone of your army',
+    content: `
+      <h2>♙ Pawns — The Foot Soldiers</h2>
+      <span class="lesson-tag">Meet the Pieces</span>
+      <p>Pawns are the <strong>most numerous</strong> and <strong>most interesting</strong> pieces in chess. They move forward but capture diagonally!</p>
+      <div class="piece-intro">
+        <div class="piece-icon">♙</div>
+        <div class="piece-info">
+          <h3>The Pawn ♙</h3>
+          <p>Pawns move <strong>one square forward</strong> (towards the opponent). From their <strong>starting position</strong>, they can also move <strong>two squares forward</strong> on their very first move. But they can <strong>only capture one square diagonally forward</strong>.</p>
+        </div>
+      </div>
+      <div class="moves-demo">
+        Move: forward 1 square (or 2 from start)<br>
+        Capture: diagonally forward only!
+      </div>
+      <div class="tip-box">
+        <div class="tip-title">💡 Pawn tip</div>
+        Pawns are weak alone but powerful as a group! A chain of pawns advancing together can be very strong.
+      </div>
+    `,
+    setup: null, instruction: null, action: null, expectFrom: null, expectTo: null
+  },
+  {
+    id: 8,
+    title: 'Your First Move!',
+    module: 'Putting It Together',
+    desc: 'Make a legal move on the board',
+    content: `
+      <h2>♟ Your First Move!</h2>
+      <span class="lesson-tag">Putting It Together</span>
+      <p>Time to put it all together! Let's make a real chess move.</p>
+      <p>White always moves <strong>first</strong>. A good opening move is to move the <strong>pawn in front of the queen two squares forward</strong> (from d2 to d4).</p>
+      <div class="tip-box">
+        <div class="tip-title">🎯 Your goal</div>
+        Move the pawn from <strong>d2 to d4</strong>. This is a classic opening move called the "Queen's Pawn Opening"!
+      </div>
+    `,
+    setup: [['P','P','P','P','P','P','P','P'],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null]],
+    instruction: 'Move the pawn from d2 to d4!',
+    action: 'move_piece',
+    expectFrom: [6,3], expectTo: [4,3],
+    successMsg: '🎉 Perfect! That\'s the Queen\'s Pawn Opening — a great way to start!'
+  },
+  {
+    id: 9,
+    title: 'Moving the Knight',
+    module: 'Putting It Together',
+    desc: 'Try the knight\'s unique L-shaped move',
+    content: `
+      <h2>♘ Move the Knight!</h2>
+      <span class="lesson-tag">Putting It Together</span>
+      <p>Knights move in a very special way — in an <strong>L-shape</strong>: two squares in one direction, then one square perpendicular!</p>
+      <p>From its starting position, a white knight can move to <strong>two different squares</strong>. Let's try moving the <strong>knight from b1 to c3</strong> — one of the most popular opening moves in chess!</p>
+      <div class="moves-demo">
+        Knight b1 → c3: 2 steps forward (toward rank 3), then 1 step right!
+      </div>
+      <div class="tip-box">
+        <div class="tip-title">🎯 Your goal</div>
+        Move the knight from <strong>b1 to c3</strong>. This develops your knight towards the centre!
+      </div>
+    `,
+    setup: [['P','P','P','P','P','P','P','P'],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,'N',null,null,null,null,null],[null,null,null,null,null,null,null,null]],
+    instruction: 'Move the knight from b1 to c3!',
+    action: 'move_piece',
+    expectFrom: [6,1], expectTo: [4,2],
+    successMsg: '🧠 Great! Knight to c3 — a classic developing move!'
+  },
+  {
+    id: 10,
+    title: 'Capture a Piece!',
+    module: 'Tactics Basics',
+    desc: 'Learn how to capture your opponent\'s pieces',
+    content: `
+      <h2>⚔️ Capture a Piece!</h2>
+      <span class="lesson-tag">Tactics Basics</span>
+      <p>Capturing means <strong>taking an opponent's piece off the board</strong>! Most pieces capture by moving to the square where the enemy piece sits.</p>
+      <p>Here's a black pawn on <strong>d5</strong>. Your white pawn is on <strong>e4</strong>. Can you capture it?</p>
+      <div class="tip-box">
+        <div class="tip-title">🎯 Remember!</div>
+        Pawns capture <strong>diagonally forward</strong> — one square to the left or right!
+      </div>
+    `,
+    setup: [['p','p','p','p','p','p','p','p'],[null,null,null,null,null,null,null,null],[null,null,null,null,'p',null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null]],
+    instruction: 'Capture the pawn on d5! Move your pawn from e4 to d5.',
+    action: 'move_piece',
+    expectFrom: [4,4], expectTo: [3,3],
+    successMsg: '⚔️ Captured! Notice the pawn moves diagonally to capture — it\'s the only piece that moves differently when capturing.'
+  },
+  {
+    id: 11,
+    title: 'Check! What Does It Mean?',
+    module: 'Tactics Basics',
+    desc: 'When your King is under attack',
+    content: `
+      <h2>⚠️ What is Check?</h2>
+      <span class="lesson-tag">Tactics Basics</span>
+      <p>When a piece is <strong>threatening to capture your King</strong>, we say your King is in <strong>"check"</strong>. You <strong>must</strong> get out of check on your next move!</p>
+      <p>There are <strong>three ways to get out of check</strong>:</p>
+      <div class="moves-demo">
+        1️⃣ Move the King to a safe square<br>
+        2️⃣ Block the attacking piece<br>
+        3️⃣ Capture the attacking piece
+      </div>
+      <p>Here's a setup: the black queen is threatening the white king on e1! You need to <strong>move the king to safety</strong> — try moving it to e2 or g1.</p>
+      <div class="tip-box">
+        <div class="tip-title">🎯 Your goal</div>
+        Move the white king <strong>from e1 to g1</strong> (short castling kingside — we'll learn about that later, but here it's just moving the king!). Or try e2. The key is to get the king OUT of check!
+      </div>
+    `,
+    setup: [['k',null,null,null,null,null,null,'r'],[null,null,null,null,null,null,null,'p'],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,'K',null,null,'R']],
+    instruction: 'The king is in check! Move it from e1 to g1 to escape!',
+    action: 'move_piece',
+    expectFrom: [7,4], expectTo: [7,6],
+    successMsg: '✅ Great escape! Moving the king out of check is one of the most important skills in chess.'
+  },
+  {
+    id: 12,
+    title: 'Give Check!',
+    module: 'Tactics Basics',
+    desc: 'Put your opponent\'s king in check',
+    content: `
+      <h2>♛ Give Check!</h2>
+      <span class="lesson-tag">Tactics Basics</span>
+      <p>Now it's your turn to go on the attack! <strong>Putting your opponent's king in check</strong> puts them on the defensive and is the first step towards winning.</p>
+      <p>Here's a setup: you have a queen on <strong>d1</strong> and the black king is on <strong>e8</strong>. Can you give check?</p>
+      <div class="tip-box">
+        <div class="tip-title">🎯 Hint</div>
+        The queen moves in a straight line in any direction. Can you find a square where she threatens the king on e8?
+      </div>
+    `,
+    setup: [['k',null,null,null,null,null,null,'r'],[null,null,null,null,null,null,null,'p'],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,'Q',null,null,null,'R']],
+    instruction: 'Move the queen to give check to the king on e8! Try e1, e4, or d8.',
+    action: 'check',
+    expectFrom: [7,3], expectTo: [6,3],
+    successMsg: '♛ Checkmate prep! Giving check forces your opponent to respond defensively.'
+  },
+  {
+    id: 13,
+    title: 'Checkmate!',
+    module: 'Tactics Basics',
+    desc: 'The game-winning move — trap the king!',
+    content: `
+      <h2>♔ Checkmate — Victory!</h2>
+      <span class="lesson-tag">Tactics Basics</span>
+      <p><strong>Checkmate</strong> is when the king is <strong>in check AND has no way to escape</strong>. That's how you win the game!</p>
+      <p>Here's a famous checkmate pattern called the <strong>"Scholars Mate"</strong>. The black king is trapped by the white queen and bishop on the back rank.</p>
+      <p>Move the queen from <strong>d1 to d8</strong> — checkmate! The king has nowhere to run.</p>
+      <div class="moves-demo">
+        ♛ Q to d8 = CHECKMATE! ♔<br>
+        The king cannot move, cannot block, cannot capture. Game over!
+      </div>
+      <div class="tip-box">
+        <div class="tip-title">🏆 You did it!</div>
+        You just played the Scholars Mate — one of the fastest checkmates in chess! Now you know how to win a game!
+      </div>
+    `,
+    setup: [['k',null,null,null,null,null,null,'r'],[null,null,null,null,null,null,null,'p'],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,'Q',null,null,null,'R']],
+    instruction: 'Move the queen from d1 to d8 — checkmate!',
+    action: 'move_piece',
+    expectFrom: [7,3], expectTo: [0,3],
+    successMsg: '🏆 SCHOLARS MATE! That\'s game over! You\'re officially a chess player now!'
+  }
+];
+
+let currentLesson = 0;
+let learnBoard, learnTurn, learnSelected, learnDone;
+let feedbackTimeout;
+
+function showLessonList() {
+  const done = getDoneLessons();
+  const pips = LESSONS.map((l, i) => {
+    const cls = done[l.id] ? 'done' : (i === currentLesson ? 'current' : '');
+    return `<div class="pip ${cls}" title="${l.title}"></div>`;
+  }).join('');
+  document.getElementById('learnProgress').innerHTML = pips;
+
+  document.getElementById('lessonList').innerHTML = LESSONS.map((l, i) => `
+    <div class="lesson-card" onclick="startLesson(${i})">
+      <div class="lesson-num">Lesson ${i+1} · ${l.module}</div>
+      <div class="lesson-title">${done[l.id] ? '<span class="lesson-done-check">✓</span>' : ''} ${l.title}</div>
+      <div class="lesson-desc">${l.desc}</div>
+    </div>
+  `).join('');
+
+  // Hide play view sidebar controls
+  document.getElementById('playView').classList.add('hidden');
+  document.getElementById('learnView').classList.remove('hidden');
+}
+
+function startLesson(index) {
+  currentLesson = index;
+  const lesson = LESSONS[index];
+
+  // Show content overlay first
+  document.getElementById('learnPanelContent').innerHTML = lesson.content + `
+    <div class="learn-btn-row">
+      <button class="green" onclick="launchLessonBoard(${index})">▶ Let's Practice!</button>
+    </div>
+  `;
+  document.getElementById('learnOverlay').classList.add('active');
+}
+
+function launchLessonBoard(index) {
+  document.getElementById('learnOverlay').classList.remove('active');
+  currentLesson = index;
+  const lesson = LESSONS[index];
+
+  // Setup board
+  if (lesson.setup) {
+    learnBoard = lesson.setup.map(row => [...row]);
+  } else {
+    learnBoard = [
+      ['r','n','b','q','k','b','n','r'],
+      ['p','p','p','p','p','p','p','p'],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      ['P','P','P','P','P','P','P','P'],
+      ['R','N','B','Q','K','B','N','R'],
+    ];
+  }
+
+  learnTurn = 'white';
+  learnSelected = null;
+  learnDone = false;
+
+  // Build lesson board
+  const boardEl = document.getElementById('learnBoard');
+  boardEl.innerHTML = '';
+  boardEl.style.display = 'grid';
+  boardEl.style.gridTemplateColumns = 'repeat(8, 70px)';
+  boardEl.style.gridTemplateRows = 'repeat(8, 70px)';
+  boardEl.style.border = '3px solid #b58863';
+  boardEl.style.boxShadow = '0 8px 32px rgba(0,0,0,0.5)';
+
+  for (let row = 0; row < 8; row++) {
+    for (let col = 0; col < 8; col++) {
+      const sq = document.createElement('div');
+      const isLight = (row + col) % 2 === 0;
+      sq.className = `square ${isLight ? 'light' : 'dark'}`;
+      sq.dataset.row = row;
+      sq.dataset.col = col;
+      sq.style.width = '70px';
+      sq.style.height = '70px';
+      sq.style.display = 'flex';
+      sq.style.alignItems = 'center';
+      sq.style.justifyContent = 'center';
+      sq.style.fontSize = '54px';
+      sq.style.position = 'relative';
+      sq.style.userSelect = 'none';
+
+      // Highlight source square in lessons with expectFrom
+      if (lesson.expectFrom && lesson.expectFrom[0] === row && lesson.expectFrom[1] === col) {
+        sq.classList.add('lesson-hint');
+      }
+
+      const piece = learnBoard[row][col];
+      if (piece) sq.innerHTML = PIECE_SVG[piece];
+      sq.addEventListener('click', () => learnOnClick(row, col));
+      boardEl.appendChild(sq);
+    }
+  }
+
+  document.getElementById('learnStatus').innerHTML = `📖 <strong>${lesson.instruction || lesson.title}</strong>`;
+  showFeedback('', '');
+}
+
+function learnOnClick(row, col) {
+  if (learnDone) return;
+  const lesson = LESSONS[currentLesson];
+  const piece = learnBoard[row][col];
+
+  if (learnSelected) {
+    const [fr, fc] = learnSelected;
+
+    // Validate this is the expected move
+    if (lesson.expectFrom && lesson.expectTo) {
+      const [ef, et] = [lesson.expectFrom, lesson.expectTo];
+      if (fr === ef[0] && fc === ef[1] && row === et[0] && col === et[1]) {
+        // Correct move!
+        learnBoard[row][col] = learnBoard[fr][fc];
+        learnBoard[fr][fc] = null;
+        learnDone = true;
+        markLessonDone(lesson.id);
+        renderLearnBoard();
+        showFeedback('success', lesson.successMsg || '🎉 Perfect move!');
+        return;
+      }
+    } else if (lesson.action === 'check') {
+      // Any move that gives check is OK — simplified
+      learnBoard[row][col] = learnBoard[fr][fc];
+      learnBoard[fr][fc] = null;
+      learnDone = true;
+      markLessonDone(lesson.id);
+      renderLearnBoard();
+      showFeedback('success', lesson.successMsg || '✅ Great move!');
+      return;
+    }
+
+    // Wrong move — try again
+    learnSelected = null;
+    renderLearnBoard();
+    showFeedback('error', 'Not quite! ' + (lesson.instruction || 'Try a different move.'));
+    feedbackTimeout = setTimeout(() => showFeedback('', ''), 2500);
+    return;
+  }
+
+  // Select piece
+  if (piece && pieceColor(piece) === learnTurn) {
+    learnSelected = [row, col];
+  } else if (!piece && lesson.action !== 'move_piece') {
+    return;
+  } else if (!piece) {
+    showFeedback('error', 'Pick a piece to move!');
+    feedbackTimeout = setTimeout(() => showFeedback('', ''), 1500);
+    return;
+  }
+  renderLearnBoard();
+}
+
+function renderLearnBoard() {
+  const boardEl = document.getElementById('learnBoard');
+  const lesson = LESSONS[currentLesson];
+  const squares = boardEl.querySelectorAll('.square');
+  squares.forEach(sq => {
+    const r = parseInt(sq.dataset.row), c = parseInt(sq.dataset.col);
+    const piece = learnBoard[r][c];
+    sq.innerHTML = piece ? PIECE_SVG[piece] : '';
+    sq.classList.remove('selected', 'lesson-hint');
+    if (learnSelected && learnSelected[0] === r && learnSelected[1] === c) sq.classList.add('selected');
+    if (lesson.expectFrom && lesson.expectFrom[0] === r && lesson.expectFrom[1] === c && !learnDone) sq.classList.add('lesson-hint');
+  });
+}
+
+function showFeedback(type, msg) {
+  const el = document.getElementById('feedbackBanner');
+  el.className = 'feedback-banner';
+  if (type === 'success') el.classList.add('success');
+  else if (type === 'error') el.classList.add('error');
+  el.textContent = msg;
+  if (type) el.style.display = 'block';
+  else el.style.display = 'none';
+}
+
+function resetLesson() {
+  clearTimeout(feedbackTimeout);
+  showFeedback('', '');
+  launchLessonBoard(currentLesson);
+}
+
+function nextLesson() {
+  clearTimeout(feedbackTimeout);
+  showFeedback('', '');
+  if (currentLesson < LESSONS.length - 1) {
+    startLesson(currentLesson + 1);
+  } else {
+    // All done!
+    document.getElementById('learnPanelContent').innerHTML = `
+      <h2>🏆 Congratulations!</h2>
+      <span class="lesson-tag">Course Complete</span>
+      <p>You've completed the entire Chess Fundamentals course! You now know:</p>
+      <div class="tip-box">
+        <div class="tip-title">What you've learned</div>
+        ✓ How all the pieces move<br>
+        ✓ Basic rules and special moves<br>
+        ✓ How to give and escape check<br>
+        ✓ The basics of checkmate<br>
+        ✓ Your first tactics!
+      </div>
+      <p>Ready for the real thing? Switch to <strong>Play mode</strong> and challenge a friend!</p>
+      <div class="learn-btn-row">
+        <button class="green" onclick="setMode('play')">♟ Start Playing!</button>
+        <button onclick="startLesson(0)">📖Replay Lessons</button>
+      </div>
+    `;
+    document.getElementById('learnOverlay').classList.add('active');
+  }
 }
 
 init();
