@@ -273,7 +273,7 @@ const SVG = {
 // Black piece SVGs — same shapes, darker fill
 const BSVG = {};
 Object.keys(SVG).forEach(k => {
-  BSVG[k] = SVG[k].replace(/fill="#fff"/g, 'fill="#1a1a1a"').replace(/stroke="#fff"/g, 'stroke="#1a1a1a"');
+  BSVG[k.toLowerCase()] = SVG[k].replace(/fill="#fff"/g, 'fill="#1a1a1a"').replace(/stroke="#fff"/g, 'stroke="#1a1a1a"');
 });
 
 const PIECES = { K:'♔', Q:'♕', R:'♖', B:'♗', N:'♘', P:'♙',
