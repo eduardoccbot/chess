@@ -838,7 +838,7 @@ const LESSONS = [
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
-      [null,null,null,'P',null,null,null,null],   // d4 = row 4, col 3 (target position)
+      [null,null,null,null,null,null,null,null],   // d4 = row 4, col 3 (EMPTY - pawn moves here)
       [null,null,null,null,null,null,null,null],
       [null,null,null,'P',null,null,null,null],   // d2 = row 6, col 3 (source position)
       [null,null,null,null,null,null,null,null],
@@ -878,7 +878,7 @@ const LESSONS = [
     <div class="tip-box"><div class="tip-title">🎯 Your goal</div>Capture the pawn on <strong>d5</strong> by moving your pawn from e4 to d5!</div>`,
     setup:[
       [null,null,null,null,null,null,null,null],
-      [null,null,null,'p',null,null,null,null],   // d7 = row 1, col 3... wait setup should show d5 pawn
+      [null,null,null,null,null,null,null,null],   // was spurious d7 pawn at [1,3]
       [null,null,null,null,null,null,null,null],
       [null,null,null,'p',null,null,null,null],   // d5 = row 3, col 3 (target - black pawn to capture)
       [null,null,null,null,'P',null,null,null],   // e4 = row 4, col 4 (white pawn to move from)
@@ -944,14 +944,14 @@ const LESSONS = [
     <div class="moves-demo">♛ Q to d8 = CHECKMATE! ♔<br>The king has no safe square, can't block, can't capture. Game over!</div>
     <div class="tip-box"><div class="tip-title">🏆 Your goal</div>Move the queen from <strong>d1 to d8</strong> — this delivers checkmate!</div>`,
     setup:[
-      [null,null,null,'k',null,null,null,null],   // d8 = [0,3] king
-      [null,null,null,'Q',null,null,null,null],   // d8 = queen target position [0,3]
+      [null,null,null,'k',null,null,null,null],   // d8 = [0,3] black king
+      [null,null,null,null,null,null,null,null],   // row 1, col 3 - was spurious white queen
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
-      [null,null,'B','Q',null,null,null,null],    // c1=[7,2] bishop, d1=[7,3] queen source
+      [null,null,'B','Q',null,null,null,null],    // c1=[7,2] bishop, d1=[7,3] white queen
     ],
     instruction:'Checkmate! Move the queen from d1 to d8!',
     action:'move_piece',
