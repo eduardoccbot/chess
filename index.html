@@ -415,11 +415,11 @@
       <div class="info-grid">
         <div class="info-item">
           <label>White</label>
-          <value id="whiteStatus">—</value>
+          <span id="whiteStatus">—</span>
         </div>
         <div class="info-item">
           <label>Black</label>
-          <value id="blackStatus">—</value>
+          <span id="blackStatus">—</span>
         </div>
       </div>
     </div>
@@ -500,6 +500,8 @@ function setMode(mode) {
 let board, turn, selected, enPassant, halfMoveClock, fullMoveNumber;
 let moveHistory, capturedWhite, capturedBlack;
 let gameOver, promotionPending;
+let boardHistory; // full board state snapshots for undo
+let castlingRights = { wK: true, wQ: true, bK: true, bQ: true };
 
 function init() {
   board = [
@@ -515,7 +517,9 @@ function init() {
   turn = 'white'; selected = null; enPassant = null;
   halfMoveClock = 0; fullMoveNumber = 1;
   moveHistory = []; capturedWhite = []; capturedBlack = [];
+  boardHistory = [];
   gameOver = false; promotionPending = null;
+  castlingRights = { wK: true, wQ: true, bK: true, bQ: true };
   renderBoard(); updateStatus(); updateMoveList(); updateCaptured(); updateInfo();
   document.getElementById('gameOverOverlay').classList.remove('active');
 }
@@ -529,7 +533,7 @@ function getMoves(row, col) {
   const color = pieceColor(piece);
   const type = piece.toUpperCase();
   const moves = [];
-  const add = (r, c) => { if (inBounds(r,c) && pieceColor(board[r][c]) !== color) moves.push([r,c]); };
+  const add = (r, c) => { if (inBounds(r,c) && !board[r][c]) moves.push([r,c]); else if (inBounds(r,c) && pieceColor(board[r][c]) !== color) moves.push([r,c]); };
   const slide = (dir) => {
     for (const [dr, dc] of dir) {
       for (let i = 1; i < 8; i++) {
@@ -562,10 +566,12 @@ function getMoves(row, col) {
     for (const [dr,dc] of [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]]) add(row+dr,col+dc);
     const rowK = color === 'white' ? 7 : 0;
     if (row===rowK && col===4 && !isInCheck(color)) {
-      if (!board[rowK][5] && !board[rowK][6] && !board[rowK][7] && pieceColor(board[rowK][7])===color && board[rowK][7].toUpperCase()==='R' &&
-          !isSquareAttacked(rowK,5,color) && !isSquareAttacked(rowK,6,color)) moves.push([rowK,6,'castle']);
+      // King-side castling (O-O): need empty f8 and g8, and rook on h8
+      if (!board[rowK][5] && !board[rowK][6] && pieceColor(board[rowK][7])===color && board[rowK][7].toUpperCase()==='R' &&
+          !isSquareAttacked(rowK,5,color) && !isSquareAttacked(rowK,6,color) && castlingRights[color==='white'?'wK':'bK']) moves.push([rowK,6,'castle']);
+      // Queen-side castling (O-O-O): need empty b8, c8, d8, and rook on a8
       if (!board[rowK][1] && !board[rowK][2] && !board[rowK][3] && pieceColor(board[rowK][0])===color && board[rowK][0].toUpperCase()==='R' &&
-          !isSquareAttacked(rowK,2,color) && !isSquareAttacked(rowK,3,color)) moves.push([rowK,2,'castle']);
+          !isSquareAttacked(rowK,2,color) && !isSquareAttacked(rowK,3,color) && castlingRights[color==='white'?'wQ':'bQ']) moves.push([rowK,2,'castle']);
     }
   }
   return moves;
@@ -577,7 +583,7 @@ function getMovesRaw(row, col) {
   const color = pieceColor(piece);
   const type = piece.toUpperCase();
   const moves = [];
-  const add = (r, c) => { if (inBounds(r,c) && pieceColor(board[r][c]) !== color) moves.push([r,c]); };
+  const add = (r, c) => { if (inBounds(r,c) && !board[r][c]) moves.push([r,c]); else if (inBounds(r,c) && pieceColor(board[r][c]) !== color) moves.push([r,c]); };
   const slide = (dir) => {
     for (const [dr, dc] of dir) {
       for (let i = 1; i < 8; i++) {
@@ -604,9 +610,40 @@ function isSquareAttacked(row, col, byColor) {
   const a = byColor==='white'?'black':'white';
   for (let r=0;r<8;r++) for(let c=0;c<8;c++){
     const p=board[r][c];
-    if(p&&pieceColor(p)===a&&getMovesRaw(r,c).some(([mr,mc])=>mr===row&&mc===col))return true;
+    if(p&&pieceColor(p)===a&&getAttacks(r,c).some(([mr,mc])=>mr===row&&mc===col))return true;
   }
   return false;
+}
+
+// Returns squares a piece attacks (empty or occupied squares — for attack detection)
+function getAttacks(row, col) {
+  const piece = board[row][col];
+  if (!piece) return [];
+  const color = pieceColor(piece);
+  const type = piece.toUpperCase();
+  const moves = [];
+  const add = (r, c) => { if (inBounds(r,c)) moves.push([r,c]); };
+  const slide = (dir) => {
+    for (const [dr, dc] of dir) {
+      for (let i = 1; i < 8; i++) {
+        const nr = row+dr*i, nc = col+dc*i;
+        if (!inBounds(nr,nc)) break;
+        moves.push([nr,nc]);
+        if (board[nr][nc]) break;
+      }
+    }
+  };
+  if (type === 'P') {
+    // Pawns attack diagonally forward — white attacks row-1, black attacks row+1
+    const dir = color === 'white' ? -1 : 1;
+    add(row+dir, col-1);
+    add(row+dir, col+1);
+  } else if (type === 'N') { for (const [dr,dc] of [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]]) add(row+dr,col+dc); }
+  else if (type === 'B') slide([[-1,-1],[-1,1],[1,-1],[1,1]]);
+  else if (type === 'R') slide([[-1,0],[1,0],[0,-1],[0,1]]);
+  else if (type === 'Q') slide([[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]]);
+  else if (type === 'K') { for(const [dr,dc] of [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]]) add(row+dr,col+dc); }
+  return moves;
 }
 
 function findKing(color) {
@@ -614,7 +651,7 @@ function findKing(color) {
   return null;
 }
 
-function isInCheck(color){const[k]=findKing(color);return k?isSquareAttacked(k[0],k[1],color):false;}
+function isInCheck(color){const k=findKing(color);return k?isSquareAttacked(k[0],k[1],color):false;}
 function isStalemate(color){if(isInCheck(color))return false;for(let r=0;r<8;r++)for(let c=0;c<8;c++)if(board[r][c]&&pieceColor(board[r][c])===color&&getLegalMoves(r,c).length>0)return false;return true;}
 
 function getLegalMoves(row, col) {
@@ -697,6 +734,8 @@ function onSquareClick(row,col){
 }
 
 function doMove(fr,fc,tr,tc,flag){
+  // Save full state for undo
+  boardHistory.push(JSON.parse(JSON.stringify({board, turn, enPassant, capturedWhite: [...capturedWhite], capturedBlack: [...capturedBlack], halfMoveClock, fullMoveNumber, castlingRights: {...castlingRights}})));
   const piece=board[fr][fc];
   const cap=board[tr][tc];
   const color=pieceColor(piece);
@@ -708,6 +747,11 @@ function doMove(fr,fc,tr,tc,flag){
   if(epCap)(pieceColor(epCap)==='white'?capturedBlack:capturedWhite).push(epCap);
   enPassant=null;
   if(piece.toUpperCase()==='P'&&Math.abs(tr-fr)===2)enPassant={row:(fr+tr)/2,col:fc};
+  // Revoke castling rights on king or rook move
+  if(piece.toUpperCase()==='K'){if(color==='white'){castlingRights.wK=false;castlingRights.wQ=false;}else{castlingRights.bK=false;castlingRights.bQ=false;}}
+  if(piece.toUpperCase()==='R'){if(fr===7&&fc===7)castlingRights.wK=false;if(fr===7&&fc===0)castlingRights.wQ=false;if(fr===0&&fc===7)castlingRights.bK=false;if(fr===0&&fc===0)castlingRights.bQ=false;}
+  // Revoke if a rook is captured
+  if(cap&&cap.toUpperCase()==='R'){if(tr===7&&tc===7)castlingRights.wK=false;if(tr===7&&tc===0)castlingRights.wQ=false;if(tr===0&&tc===7)castlingRights.bK=false;if(tr===0&&tc===0)castlingRights.bQ=false;}
   const FILES='abcdefgh';
   const nota=flag==='castle'?(tc===6?'O-O':'O-O-O'):`${piece.toUpperCase()!=='P'?piece.toUpperCase():''}${(cap||epCap)?(piece.toUpperCase()==='P'?FILES[fc]:'')+'x':''}${FILES[tc]}${8-tr}`;
   moveHistory.push(nota);
@@ -726,14 +770,13 @@ function choosePromotion(piece){
   const{row,col}=promotionPending;
   board[row][col]=piece;promotionPending=null;
   document.getElementById('promotionModal').classList.remove('active');
+  moveHistory[moveHistory.length-1]+='='+piece.toUpperCase();
   finishTurn();
 }
 
 function finishTurn(){
   turn=turn==='white'?'black':'white';
   if(turn==='white')fullMoveNumber++;
-  if(isInCheck(turn)&&isStalemate(turn)){endGame('stalemate');return;}
-  if(isStalemate(turn)){endGame('stalemate');return;}
   let hasLegal=false;
   outer:for(let r=0;r<8;r++)for(let c=0;c<8;c++)if(board[r][c]&&pieceColor(board[r][c])===turn&&getLegalMoves(r,c).length>0){hasLegal=true;break outer;}
   if(!hasLegal){endGame(isInCheck(turn)?'checkmate':'stalemate');return;}
@@ -749,7 +792,25 @@ function endGame(reason){
   renderBoard();updateStatus();
 }
 
-function undoMove(){resetGame();}
+function undoMove(){
+  if(boardHistory.length === 0) return;
+  // Undo one half-move (one board state snapshot = one doMove call)
+  const state = boardHistory.pop();
+  board = state.board;
+  turn = state.turn;
+  enPassant = state.enPassant;
+  capturedWhite = state.capturedWhite;
+  capturedBlack = state.capturedBlack;
+  halfMoveClock = state.halfMoveClock;
+  fullMoveNumber = state.fullMoveNumber;
+  castlingRights = {...state.castlingRights};
+  moveHistory.pop(); // undo one half-move notation
+  gameOver = false;
+  promotionPending = null;
+  selected = null;
+  document.getElementById('gameOverOverlay').classList.remove('active');
+  renderBoard(); updateStatus(); updateMoveList(); updateCaptured(); updateInfo();
+}
 function resetGame(){init();}
 
 
@@ -898,16 +959,16 @@ const LESSONS = [
     <p>There are <strong>three ways to escape check</strong>:</p>
     <div class="moves-demo">1️⃣ Move the King to a safe square<br>2️⃣ Block the attacking piece<br>3️⃣ Capture the attacking piece</div>
     <p>The white king is in check from the rook! Move it to safety on <strong>g1</strong>.</p>
-    <div class="tip-box"><div class="tip-title">🎯 Your goal</div>Move the white king from <strong>e1 → g1</strong> to escape the rook's attack!</div>`,
+    <div class="tip-box"><div class="tip-title\">🎯 Your goal</div>Move the white king from <strong>e1 → g1</strong> to escape the rook's attack!</div>`,
     setup:[
-      [null,null,null,null,null,null,null,'r'],   // h8 rook attacking e1
+      [null,null,null,null,'r',null,null,null],   // e8 = [0,4] rook attacking e1 down the e-file
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
-      [null,null,null,null,'K',null,null,'R'],    // e1=king [7,4], h1=rook [7,7]
+      [null,null,null,'K',null,null,null,'R'],    // e1=king [7,4], h1=rook [7,7]
     ],
     instruction:'Escape check! Move the king from e1 to g1!',
     action:'move_piece',
@@ -920,10 +981,10 @@ const LESSONS = [
     <p>Now it's your turn to attack! <strong>Giving check</strong> forces your opponent to respond defensively, buying you time to build your attack.</p>
     <p>The white queen is on <strong>d1</strong> and the black king is on <strong>e8</strong>. Can you give check?</p>
     <div class="moves-demo">♛ Move the queen to give check to the king on e8!</div>
-    <div class="tip-box"><div class="tip-title">🎯 Hint</div>The queen moves in a straight line. Try moving her to <strong>e1</strong> (directly toward the king), <strong>e4</strong>, or <strong>d8</strong>.</div>`,
+    <div class="tip-box"><div class="tip-title">🎯 Hint</div>The queen moves in a straight line. Try moving her to <strong>e1</strong> (directly toward the king), <strong>e4</strong>, or <strong>f7</strong>.</div>`,
     setup:[
-      [null,null,null,'k',null,null,null,null],   // d8 = [0,3] black king
       [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],   // f7 = [1,5]
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
@@ -931,27 +992,27 @@ const LESSONS = [
       [null,null,null,null,null,null,null,null],
       [null,null,null,'Q',null,null,null,null],   // d1 = [7,3] white queen
     ],
-    instruction:'Move the queen to give check! Try d1→d8, d1→e1, or d1→e4',
+    instruction:'Move the queen to give check! Try d1→e1, d1→e4, or d1→f7',
     action:'move_piece',
-    expectFrom:[7,3], expectTo:[0,3],
+    expectFrom:[7,3], expectTo:[1,5],
     successMsg:'♛ Check! You\'re putting pressure on your opponent — great work!'
   },
   {
     id:13, title:'Checkmate!', module:'Tactics Basics', desc:"The game-winning move — trap the king!",
     content:`<h2>♔ Checkmate — Victory!</h2><span class="lesson-tag">Tactics Basics</span>
     <p><strong>Checkmate</strong> is when the king is <strong>in check AND has no way to escape</strong>. That's how you win!</p>
-    <p>Here's the famous <strong>Scholar's Mate</strong> — one of the fastest checkmates in chess. The white queen and the bishop on c1 work together to trap the black king.</p>
-    <div class="moves-demo">♛ Q to d8 = CHECKMATE! ♔<br>The king has no safe square, can't block, can't capture. Game over!</div>
+    <p>Here's the famous <strong>Scholar's Mate</strong> — one of the fastest checkmates in chess. The white queen and the bishop on c4 work together to trap the black king.</p>
+    <div class="moves-demo">♛ Q to d8 = CHECKMATE! ♔<br>The king has no safe square — can't move, block, or capture. Game over!</div>
     <div class="tip-box"><div class="tip-title">🏆 Your goal</div>Move the queen from <strong>d1 to d8</strong> — this delivers checkmate!</div>`,
     setup:[
-      [null,null,null,'k',null,null,null,null],   // d8 = [0,3] black king
-      [null,null,null,null,null,null,null,null],   // row 1, col 3 - was spurious white queen
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
-      [null,null,'B','Q',null,null,null,null],    // c1=[7,2] bishop, d1=[7,3] white queen
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,'Q',null,null,null,null],   // d1 = [7,3] white queen
     ],
     instruction:'Checkmate! Move the queen from d1 to d8!',
     action:'move_piece',
