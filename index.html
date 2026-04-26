@@ -899,9 +899,9 @@ const LESSONS = [
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
-      [null,null,null,null,null,null,null,null],   // d4 = row 4, col 3 (EMPTY - pawn moves here)
+      [null,null,null,null,null,null,null,null], // row 4: d4 is [4,3]
       [null,null,null,null,null,null,null,null],
-      [null,null,null,'P',null,null,null,null],   // d2 = row 6, col 3 (source position)
+      [null,null,null,'P',null,null,null,null], // row 6: d2 is [6,3]
       [null,null,null,null,null,null,null,null],
     ],
     instruction:'Move the pawn from d2 to d4!',
@@ -920,18 +920,39 @@ const LESSONS = [
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
-      [null,null,null,null,null,null,null,null],  // c3 = row 4, col 2 (target)
       [null,null,null,null,null,null,null,null],
-      [null,null,'N',null,null,null,null,null],  // b1 = row 6, col 1 (source)
+      [null,null,null,null,null,null,null,null], // row 5: c3 is [5,2]
       [null,null,null,null,null,null,null,null],
+      [null,'N',null,null,null,null,null,null], // row 7: b1 is [7,1]
     ],
     instruction:'Move the knight from b1 to c3!',
     action:'move_piece',
-    expectFrom:[6,1], expectTo:[4,2],
+    expectFrom:[7,1], expectTo:[5,2],
     successMsg:'🧠 Great! Knight to c3 — one of the most played opening moves in chess!'
   },
   {
-    id:10, title:'Capture a Piece!', module:'Tactics Basics', desc:"Learn how to take your opponent's pawns",
+    id:10, title:'The Pawn\'s Double Step', module:'Putting It Together', desc:"Launch your pawn into the center",
+    content:`<h2>🚀 The Double Step</h2><span class="lesson-tag">Putting It Together</span>
+    <p>Remember how pawns can move <strong>two squares on their very first move</strong>? It's a great way to control the center of the board quickly.</p>
+    <div class="moves-demo">♙ e2 → e4: Advance the King's pawn two squares!</div>
+    <div class="tip-box"><div class="tip-title">🎯 Your goal</div>Move the pawn in front of your King from <strong>e2 to e4</strong>!</div>`,
+    setup:[
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null], // row 4: e4 is [4,4]
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,'P',null,null,null], // row 6: e2 is [6,4]
+      [null,null,null,null,null,null,null,null],
+    ],
+    instruction:'Move your pawn from e2 to e4!',
+    action:'move_piece',
+    expectFrom:[6,4], expectTo:[4,4],
+    successMsg:'⚡ Boom! Controlling the center is the key to winning chess games.'
+  },
+  {
+    id:11, title:'Capture a Piece!', module:'Tactics Basics', desc:"Learn how to take your opponent's pawns",
     content:`<h2>⚔️ Capture a Piece!</h2><span class="lesson-tag">Tactics Basics</span>
     <p>Most pieces capture by moving <strong>to the square where the enemy piece sits</strong>. But pawns are special — they capture <strong>diagonally forward only</strong>!</p>
     <p>Here's a black pawn on <strong>d5</strong>. Your white pawn is on <strong>e4</strong>. Can you capture it?</p>
@@ -939,10 +960,10 @@ const LESSONS = [
     <div class="tip-box"><div class="tip-title">🎯 Your goal</div>Capture the pawn on <strong>d5</strong> by moving your pawn from e4 to d5!</div>`,
     setup:[
       [null,null,null,null,null,null,null,null],
-      [null,null,null,null,null,null,null,null],   // was spurious d7 pawn at [1,3]
       [null,null,null,null,null,null,null,null],
-      [null,null,null,'p',null,null,null,null],   // d5 = row 3, col 3 (target - black pawn to capture)
-      [null,null,null,null,'P',null,null,null],   // e4 = row 4, col 4 (white pawn to move from)
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,'p',null,null,null,null], // row 3: d5 [3,3] (black)
+      [null,null,null,null,'P',null,null,null], // row 4: e4 [4,4] (white)
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
@@ -953,57 +974,164 @@ const LESSONS = [
     successMsg:'⚔️ Captured! Pawns move forward but capture diagonally — the only piece that does this!'
   },
   {
-    id:11, title:'Check! What Does It Mean?', module:'Tactics Basics', desc:"When your King is under attack",
+    id:12, title:'En Passant', module:'Special Rules', desc:"The secret pawn-capturing trick",
+    content:`<h2>👻 En Passant!</h2><span class="lesson-tag">Special Rules</span>
+    <p><strong>En Passant</strong> (in passing) is a tricky French rule! If your pawn is on the 5th rank (row 4 for White), and an enemy pawn moves <em>two squares</em> landing right next to it, you can capture it as if it only moved one square.</p>
+    <div class="moves-demo">♙ e5 → d6: Capture diagonally behind the pawn that just rushed past you!</div>
+    <div class="tip-box"><div class="tip-title">🎯 Your goal</div>Black just moved their pawn to d5. Capture it by moving your e5 pawn diagonally to <strong>d6</strong>!</div>`,
+    setup:[
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null], // row 2: d6 is [2,3] (target)
+      [null,null,null,'p','P',null,null,null], // row 3: d5 [3,3] (black), e5 [3,4] (white)
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+    ],
+    instruction:'Use En Passant! Move your pawn from e5 to d6.',
+    action:'move_piece',
+    expectFrom:[3,4], expectTo:[2,3],
+    successMsg:'👻 Tricky! You just performed an En Passant capture like a pro!'
+  },
+  {
+    id:13, title:'Pawn Promotion', module:'Special Rules', desc:"Turn your pawn into a Queen!",
+    content:`<h2>👑 Pawn Promotion</h2><span class="lesson-tag">Special Rules</span>
+    <p>If a little pawn manages to march all the way to the opposite side of the board, it gets a massive reward: it promotes into any piece you want! (Usually a Queen).</p>
+    <div class="moves-demo">♙ a7 → a8 = ♕: Step forward to the final rank and transform!</div>
+    <div class="tip-box"><div class="tip-title">🎯 Your goal</div>Move your pawn from <strong>a7 to a8</strong> and watch it become a Queen!</div>`,
+    setup:[
+      [null,null,null,null,null,null,null,null], // row 0: a8 is [0,0] (target)
+      ['P',null,null,null,null,null,null,null], // row 1: a7 is [1,0] (white pawn)
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+    ],
+    instruction:'Promote your pawn! Move from a7 to a8.',
+    action:'move_piece',
+    expectFrom:[1,0], expectTo:[0,0],
+    successMsg:'👑 Long live the Queen! Promotion is a powerful way to win the endgame.'
+  },
+  {
+    id:14, title:'Castling (Kingside)', module:'Special Rules', desc:"Protect your king and activate your rook",
+    content:`<h2>🏰 Castling</h2><span class="lesson-tag">Special Rules</span>
+    <p><strong>Castling</strong> is the only time you can move two pieces at once! It tucks your King safely in the corner and brings your Rook into the game.</p>
+    <p>To castle Kingside, the King moves <strong>two squares toward the Rook</strong>, and the Rook hops over to the other side.</p>
+    <div class="moves-demo">♔ e1 → g1: Move the King two squares right.(The Rook will follow!)</div>
+    <div class="tip-box"><div class="tip-title">🎯 Your goal</div>Move your King from <strong>e1 to g1</strong> to complete the castle.</div>`,
+    setup:[
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,'K',null,null,'R'], // row 7: e1 [7,4] (King), h1 [7,7] (Rook)
+    ],
+    instruction:'Castle Kingside! Move your King from e1 to g1.',
+    action:'move_piece',
+    expectFrom:[7,4], expectTo:[7,6],
+    successMsg:'🏰 Fortress secured! Castling early in the game is one of the best habits to build.'
+  },
+  {
+    id:15, title:'Check! What Does It Mean?', module:'Tactics Basics', desc:"When your King is under attack",
     content:`<h2>⚠️ What is Check?</h2><span class="lesson-tag">Tactics Basics</span>
     <p>When a piece is <strong>threatening to capture your King</strong>, your King is in <strong>"check"</strong>. You <strong>must</strong> get out of check on your next move!</p>
     <p>There are <strong>three ways to escape check</strong>:</p>
     <div class="moves-demo">1️⃣ Move the King to a safe square<br>2️⃣ Block the attacking piece<br>3️⃣ Capture the attacking piece</div>
-    <p>The white king is in check from the rook! Move it to safety on <strong>g1</strong>.</p>
-    <div class="tip-box"><div class="tip-title\">🎯 Your goal</div>Move the white king from <strong>e1 → g1</strong> to escape the rook's attack!</div>`,
+    <p>The white king is in check from the rook! Move it to safety on <strong>d2</strong>.</p>
+    <div class="tip-box"><div class="tip-title">🎯 Your goal</div>Move the white king from <strong>e1 → d2</strong> to escape the rook's attack!</div>`,
     setup:[
-      [null,null,null,null,'r',null,null,null],   // e8 = [0,4] rook attacking e1 down the e-file
+      [null,null,null,null,'r',null,null,null], // row 0: e8 [0,4] black rook attacking e1
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
-      [null,null,null,null,null,null,null,null],
-      [null,null,null,'K',null,null,null,'R'],    // e1=king [7,4], h1=rook [7,7]
+      [null,null,null,null,null,null,null,null], // row 6: d2 is [6,3] (target)
+      [null,null,null,null,'K',null,null,null], // row 7: e1 is [7,4]
     ],
-    instruction:'Escape check! Move the king from e1 to g1!',
+    instruction:'Escape check! Move the king from e1 to d2!',
     action:'move_piece',
-    expectFrom:[7,4], expectTo:[7,6],
-    successMsg:'✅ Great escape! Moving the king out of check is one of the most critical skills in chess!'
+    expectFrom:[7,4], expectTo:[6,3],
+    successMsg:'✅ Great escape! Reacting to checks calmly is a critical chess skill.'
   },
   {
-    id:12, title:'Give Check!', module:'Tactics Basics', desc:"Put your opponent's king under pressure",
+    id:16, title:'Give Check!', module:'Tactics Basics', desc:"Put your opponent's king under pressure",
     content:`<h2>♛ Give Check!</h2><span class="lesson-tag">Tactics Basics</span>
     <p>Now it's your turn to attack! <strong>Giving check</strong> forces your opponent to respond defensively, buying you time to build your attack.</p>
-    <p>The white queen is on <strong>d1</strong> and the black king is on <strong>e8</strong>. Can you give check?</p>
-    <div class="moves-demo">♛ Move the queen to give check to the king on e8!</div>
-    <div class="tip-box"><div class="tip-title">🎯 Hint</div>The queen moves in a straight line. Try moving her to <strong>e1</strong> (directly toward the king), <strong>e4</strong>, or <strong>f7</strong>.</div>`,
+    <p>The white queen is on <strong>d1</strong> and the black king is on <strong>e8</strong>. Can you attack it safely?</p>
+    <div class="moves-demo">♛ Move the queen to give check to the king on e8!</div>`,
     setup:[
       [null,null,null,null,null,null,null,null],
-      [null,null,null,null,null,null,null,null],   // f7 = [1,5]
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
-      [null,null,null,'Q',null,null,null,null],   // d1 = [7,3] white queen
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,'Q',null,null,null,null], // d1 = [7,3] white queen
     ],
-    instruction:'Move the queen to give check! Try d1→e1, d1→e4, or d1→f7',
+    instruction:'Move the queen to give check to the king on e8!',
     action:'move_piece',
     expectFrom:[7,3], expectTo:[1,5],
     successMsg:'♛ Check! You\'re putting pressure on your opponent — great work!'
   },
   {
-    id:13, title:'Checkmate!', module:'Tactics Basics', desc:"The game-winning move — trap the king!",
-    content:`<h2>♔ Checkmate — Victory!</h2><span class="lesson-tag">Tactics Basics</span>
-    <p><strong>Checkmate</strong> is when the king is <strong>in check AND has no way to escape</strong>. That's how you win!</p>
-    <p>Here's the famous <strong>Scholar's Mate</strong> — one of the fastest checkmates in chess. The white queen and the bishop on c4 work together to trap the black king.</p>
-    <div class="moves-demo">♛ Q to d8 = CHECKMATE! ♔<br>The king has no safe square — can't move, block, or capture. Game over!</div>
-    <div class="tip-box"><div class="tip-title">🏆 Your goal</div>Move the queen from <strong>d1 to d8</strong> — this delivers checkmate!</div>`,
+    id:17, title:'The Pin', module:'Tactics Basics', desc:"When you cannot move a piece because it exposes the king",
+    content:`<h2>📌 The Pin</h2><span class="lesson-tag">Tactics Basics</span>
+    <p>A <strong>Pin</strong> is when a piece is forced to stay put because moving it would expose its King to attack!</p>
+    <p>The bishop is attacking the knight, and the knight is blocking the attack on the king. If the knight moves, the king is in check!</p>
+    <div class="moves-demo">♗ The bishop pins the knight to the king!</div>
+    <div class="tip-box"><div class="tip-title">🎯 Your goal</div>Move the rook along the back rank. Can you capture the bishop?</div>`,
+    setup:[
+      [null,null,null,null,'k',null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,'R',null,'B','N'], // e1 rook, g1 bishop, h1 knight
+    ],
+    instruction:'Capture the bishop! Move the rook from e1 to g1.',
+    action:'move_piece',
+    expectFrom:[7,4], expectTo:[7,6],
+    successMsg:'📌 Pin broken! The bishop was pinned and you captured it safely!'
+  },
+  {
+    id:18, title:'Discovered Attack', module:'Tactics Basics', desc:"Uncover a hidden attack on the opponent's queen",
+    content:`<h2>🔍 Discovered Attack!</h2><span class="lesson-tag">Tactics Basics</span>
+    <p>A <strong>Discovered Attack</strong> happens when you move one piece and reveal another piece attacking an enemy!</p>
+    <p>Moving the bishop will uncover an attack on the black queen!</p>
+    <div class="moves-demo">♗ Move the bishop and the queen behind it attacks!</div>
+    <div class="tip-box"><div class="tip-title">🎯 Your goal</div>Move the bishop from c1 to e3!</div>`,
+    setup:[
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,'q',null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,'B',null,'Q',null,null,null],
+    ],
+    instruction:'Discover the attack! Move the bishop from c1 to e3.',
+    action:'move_piece',
+    expectFrom:[7,2], expectTo:[5,4],
+    successMsg:'🔍 Discovered attack! The queen was hiding behind the bishop!'
+  },
+  {
+    id:19, title:'Back-Rank Checkmate', module:'Tactics Basics', desc:"Deliver checkmate along the last rank",
+    content:`<h2>🏁 Back-Rank Checkmate!</h2><span class="lesson-tag">Tactics Basics</span>
+    <p>The <strong>back rank</strong> is the row closest to each player. A checkmate along the back rank happens when the king is trapped there by its own pieces!</p>
+    <p>The black king is trapped on e8 by its own pawns. Move the rook to e1 for checkmate!</p>
+    <div class="moves-demo">♜ Move the rook to e1 — checkmate on the back rank!</div>
+    <div class="tip-box"><div class="tip-title">🎯 Your goal</div>Move the rook from a1 to e1 to deliver checkmate!</div>`,
     setup:[
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
@@ -1012,12 +1140,34 @@ const LESSONS = [
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
-      [null,null,null,'Q',null,null,null,null],   // d1 = [7,3] white queen
+      ['R',null,null,null,'K','P','P',null], // a1 rook [7,0], e8 king [0,4], f8 g8 pawns [0,5],[0,6]
     ],
-    instruction:'Checkmate! Move the queen from d1 to d8!',
+    instruction:'Back-rank checkmate! Move the rook from a1 to e1!',
     action:'move_piece',
-    expectFrom:[7,3], expectTo:[0,3],
-    successMsg:'🏆 SCHOLAR\'S MATE! You\'ve won your first chess game! Absolute legend!'
+    expectFrom:[7,0], expectTo:[7,4],
+    successMsg:'🏁 BACK-RANK CHECKMATE! Trapping the king behind its own pawns!'
+  },
+  {
+    id:20, title:'Scholar\'s Mate', module:'Tactics Basics', desc:"The famous 4-move checkmate",
+    content:`<h2>🎓 Scholar\'s Mate</h2><span class="lesson-tag">Tactics Basics</span>
+    <p>The <strong>Scholar\'s Mate</strong> is one of the fastest checkmates in chess — can be done in just 4 moves!</p>
+    <p>Here's the real pattern: the queen on c4 goes to <strong>f7</strong>, delivering checkmate. The bishop on c3 supports the attack. The black king on f7 has nowhere to go!</p>
+    <div class="moves-demo">♛ Qc4 → f7 = CHECKMATE! ♔<br>The king is trapped — scholar\'s mate!</div>
+    <div class="tip-box"><div class="tip-title">🏆 Your goal</div>Move the queen from <strong>c4 to f7</strong> — delivering Scholar\'s Mate!</div>`,
+    setup:[
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,'k',null], // row 1: f7 king [1,6]
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,'B','Q',null,null,null,null], // row 7: c3 bishop [7,2], d1 queen [7,3]
+    ],
+    instruction:'Scholar\'s Mate! Move the queen from d1 to f7!',
+    action:'move_piece',
+    expectFrom:[7,3], expectTo:[1,5],
+    successMsg:'🎓 SCHOLAR\'S MATE! You\'ve mastered one of the most famous checkmates in chess!'
   }
 ];
 
@@ -1130,6 +1280,26 @@ function learnOnClick(row, col){
        row===lesson.expectTo[0]   && col===lesson.expectTo[1]){
       learnBoard[row][col]=learnBoard[fr][fc];
       learnBoard[fr][fc]=null;
+
+      // Special move visual side effects
+      const lessonId = lesson.id;
+
+      // Castling: king moved from e1 to g1 (or e8 to g8)
+      if(lessonId===14){
+        learnBoard[7][5]=learnBoard[7][7]; // rook slides to f1
+        learnBoard[7][7]=null;
+      }
+
+      // En Passant: pawn moved to capture target, remove the passant pawn
+      if(lessonId===12){
+        learnBoard[3][3]=null; // remove pawn on d5
+      }
+
+      // Pawn Promotion: auto-promote to Queen
+      if(lessonId===13){
+        learnBoard[0][0]='Q';
+      }
+
       learnDone=true;
       markLessonDone(lesson.id);
       renderLearnBoard();
