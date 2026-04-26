@@ -1130,22 +1130,22 @@ const LESSONS = [
     id:19, title:'Back-Rank Checkmate', module:'Tactics Basics', desc:"Deliver checkmate along the last rank",
     content:`<h2>🏁 Back-Rank Checkmate!</h2><span class="lesson-tag">Tactics Basics</span>
     <p>The <strong>back rank</strong> is the row closest to each player. A checkmate along the back rank happens when the king is trapped there by its own pieces!</p>
-    <p>The black king is trapped on e8 by its own pawns. Move the rook to e8 for checkmate!</p>
-    <div class="moves-demo">♜ Move the rook to e8 — checkmate on the back rank!</div>
-    <div class="tip-box"><div class="tip-title">🎯 Your goal</div>Move the rook straight up the board from e1 to e8 to deliver checkmate!</div>`,
+    <p>The black king is tucked away on g8, trapped by its own pawns. The d-file is wide open!</p>
+    <div class="moves-demo">♜ Move the rook to d8 — checkmate on the back rank!</div>
+    <div class="tip-box"><div class="tip-title">🎯 Your goal</div>Move the rook straight up the open file from d1 to d8 to deliver checkmate!</div>`,
     setup:[
-      [null,null,null,null,'k',null,null,null], // e8 (black king)
-      [null,null,null,'p','p','p',null,null],   // d7, e7, f7 (black pawns trapping the king)
+      [null,null,null,null,null,null,'k',null], // row 0: g8 (black king)
+      [null,null,null,null,null,'p','p','p'],   // row 1: f7, g7, h7 (black pawns trapping the king)
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
-      [null,null,null,null,'R',null,'K',null],  // e1 (white rook), g1 (white king)
+      [null,null,null,'R',null,null,'K',null],  // row 7: d1 (white rook), g1 (white king)
     ],
-    instruction:'Back-rank checkmate! Move the rook from e1 to e8!',
+    instruction:'Back-rank checkmate! Move the rook from d1 to d8!',
     action:'move_piece',
-    expectFrom:[7,4], expectTo:[0,4],
+    expectFrom:[7,3], expectTo:[0,3],
     successMsg:'🏁 BACK-RANK CHECKMATE! Trapping the king behind its own pawns!'
   },
   {
