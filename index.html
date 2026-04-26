@@ -1065,20 +1065,21 @@ const LESSONS = [
     content:`<h2>♛ Give Check!</h2><span class="lesson-tag">Tactics Basics</span>
     <p>Now it's your turn to attack! <strong>Giving check</strong> forces your opponent to respond defensively, buying you time to build your attack.</p>
     <p>The white queen is on <strong>d1</strong> and the black king is on <strong>e8</strong>. Can you attack it safely?</p>
-    <div class="moves-demo">♛ Move the queen to give check to the king on e8!</div>`,
+    <div class="moves-demo">♛ Move the queen to give check to the king!</div>
+    <div class="tip-box"><div class="tip-title">🎯 Hint</div>Move your Queen one square diagonally from <strong>d1 to e2</strong> so she stares straight up the board at the King!</div>`,
     setup:[
+      [null,null,null,null,'k',null,null,null],    // row 0: e8 [0,4] (Black King)
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
-      [null,null,null,null,null,null,null,null],
-      [null,null,null,null,null,null,null,null],
-      [null,null,null,'Q',null,null,null,null], // d1 = [7,3] white queen
+      [null,null,null,null,null,null,null,null],   // row 6: e2 is [6,4] (Target)
+      [null,null,null,'Q',null,null,null,null],    // row 7: d1 [7,3] (White Queen)
     ],
-    instruction:'Move the queen to give check to the king on e8!',
+    instruction:'Move the Queen from d1 to e2 to deliver Check!',
     action:'move_piece',
-    expectFrom:[7,3], expectTo:[1,5],
+    expectFrom:[7,3], expectTo:[6,4],
     successMsg:'♛ Check! You\'re putting pressure on your opponent — great work!'
   },
   {
