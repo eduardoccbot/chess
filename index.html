@@ -1086,18 +1086,18 @@ const LESSONS = [
     id:17, title:'The Pin', module:'Tactics Basics', desc:"When you cannot move a piece because it exposes the king",
     content:`<h2>📌 The Pin</h2><span class="lesson-tag">Tactics Basics</span>
     <p>A <strong>Pin</strong> is when a piece is forced to stay put because moving it would expose its King to attack!</p>
-    <p>The bishop is attacking the knight, and the knight is blocking the attack on the king. If the knight moves, the king is in check!</p>
-    <div class="moves-demo">♗ The bishop pins the knight to the king!</div>
-    <div class="tip-box"><div class="tip-title">🎯 Your goal</div>Move the rook along the back rank. Can you capture the bishop?</div>`,
+    <p>The black bishop on g1 is pinning the white knight to the white king. But wait... the bishop is unprotected!</p>
+    <div class="moves-demo">♖ The rook can capture the pinning piece!</div>
+    <div class="tip-box"><div class="tip-title">🎯 Your goal</div>Move the rook along the back rank to capture the bishop on g1.</div>`,
     setup:[
-      [null,null,null,null,'k',null,null,null],
+      [null,null,null,null,'k',null,null,null], // e8 (black king)
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
-      [null,null,null,null,null,null,null,null],
-      [null,null,null,null,null,null,null,null],
-      [null,null,null,null,'R',null,'B','N'], // e1 rook, g1 bishop, h1 knight
+      [null,null,null,null,'K',null,null,null], // e3 (white king)
+      [null,null,null,null,null,'N',null,null], // f2 (white knight - pinned!)
+      [null,null,null,null,'R',null,'b',null],  // e1 (white rook), g1 (black bishop)
     ],
     instruction:'Capture the bishop! Move the rook from e1 to g1.',
     action:'move_piece',
@@ -1110,64 +1110,64 @@ const LESSONS = [
     <p>A <strong>Discovered Attack</strong> happens when you move one piece and reveal another piece attacking an enemy!</p>
     <p>Moving the bishop will uncover an attack on the black queen!</p>
     <div class="moves-demo">♗ Move the bishop and the queen behind it attacks!</div>
-    <div class="tip-box"><div class="tip-title">🎯 Your goal</div>Move the bishop from c1 to e3!</div>`,
+    <div class="tip-box"><div class="tip-title">🎯 Your goal</div>Move the bishop from e3 to c1!</div>`,
     setup:[
-      [null,null,null,null,null,null,null,null],
-      [null,null,null,null,'q',null,null,null],
-      [null,null,null,null,null,null,null,null],
-      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,'k',null,null,null], // e8 (black king)
+      [null,null,null,null,'q',null,null,null], // e7 (black queen)
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
-      [null,null,'B',null,'Q',null,null,null],
+      [null,null,null,null,'B',null,null,null], // e3 (white bishop - blocking the queen)
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,'Q',null,'K',null],  // e1 (white queen), g1 (white king)
     ],
-    instruction:'Discover the attack! Move the bishop from c1 to e3.',
+    instruction:'Discover the attack! Move the bishop from e3 to c1.',
     action:'move_piece',
-    expectFrom:[7,2], expectTo:[5,4],
+    expectFrom:[5,4], expectTo:[7,2],
     successMsg:'🔍 Discovered attack! The queen was hiding behind the bishop!'
   },
   {
     id:19, title:'Back-Rank Checkmate', module:'Tactics Basics', desc:"Deliver checkmate along the last rank",
     content:`<h2>🏁 Back-Rank Checkmate!</h2><span class="lesson-tag">Tactics Basics</span>
     <p>The <strong>back rank</strong> is the row closest to each player. A checkmate along the back rank happens when the king is trapped there by its own pieces!</p>
-    <p>The black king is trapped on e8 by its own pawns. Move the rook to e1 for checkmate!</p>
-    <div class="moves-demo">♜ Move the rook to e1 — checkmate on the back rank!</div>
-    <div class="tip-box"><div class="tip-title">🎯 Your goal</div>Move the rook from a1 to e1 to deliver checkmate!</div>`,
+    <p>The black king is trapped on e8 by its own pawns. Move the rook to e8 for checkmate!</p>
+    <div class="moves-demo">♜ Move the rook to e8 — checkmate on the back rank!</div>
+    <div class="tip-box"><div class="tip-title">🎯 Your goal</div>Move the rook straight up the board from e1 to e8 to deliver checkmate!</div>`,
     setup:[
+      [null,null,null,null,'k',null,null,null], // e8 (black king)
+      [null,null,null,'p','p','p',null,null],   // d7, e7, f7 (black pawns trapping the king)
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
-      [null,null,null,null,null,null,null,null],
-      [null,null,null,null,null,null,null,null],
-      ['R',null,null,null,'K','P','P',null], // a1 rook [7,0], e8 king [0,4], f8 g8 pawns [0,5],[0,6]
+      [null,null,null,null,'R',null,'K',null],  // e1 (white rook), g1 (white king)
     ],
-    instruction:'Back-rank checkmate! Move the rook from a1 to e1!',
+    instruction:'Back-rank checkmate! Move the rook from e1 to e8!',
     action:'move_piece',
-    expectFrom:[7,0], expectTo:[7,4],
+    expectFrom:[7,4], expectTo:[0,4],
     successMsg:'🏁 BACK-RANK CHECKMATE! Trapping the king behind its own pawns!'
   },
   {
     id:20, title:'Scholar\'s Mate', module:'Tactics Basics', desc:"The famous 4-move checkmate",
     content:`<h2>🎓 Scholar\'s Mate</h2><span class="lesson-tag">Tactics Basics</span>
-    <p>The <strong>Scholar\'s Mate</strong> is one of the fastest checkmates in chess — can be done in just 4 moves!</p>
-    <p>Here's the real pattern: the queen on c4 goes to <strong>f7</strong>, delivering checkmate. The bishop on c3 supports the attack. The black king on f7 has nowhere to go!</p>
-    <div class="moves-demo">♛ Qc4 → f7 = CHECKMATE! ♔<br>The king is trapped — scholar\'s mate!</div>
-    <div class="tip-box"><div class="tip-title">🏆 Your goal</div>Move the queen from <strong>c4 to f7</strong> — delivering Scholar\'s Mate!</div>`,
+    <p>The <strong>Scholar\'s Mate</strong> is one of the fastest checkmates in chess — it can be done in just 4 moves!</p>
+    <p>Here\'s the real pattern: the queen on h5 goes to <strong>f7</strong>, delivering checkmate. The bishop on c4 supports the attack. The black king on e8 has nowhere to go!</p>
+    <div class="moves-demo">♛ Qh5 → f7 = CHECKMATE! ♔<br>The king is trapped — scholar\'s mate!</div>
+    <div class="tip-box"><div class="tip-title">🏆 Your goal</div>Move the queen from <strong>h5 to f7</strong> — delivering Scholar\'s Mate!</div>`,
     setup:[
+      [null,null,null,null,'k',null,null,null], // e8 (black king)
+      [null,null,null,null,null,'p',null,null], // f7 (black pawn)
       [null,null,null,null,null,null,null,null],
-      [null,null,null,null,null,null,'k',null], // row 1: f7 king [1,6]
+      [null,null,null,null,null,null,null,'Q'], // h5 (white queen)
+      [null,null,'B',null,null,null,null,null], // c4 (white bishop)
       [null,null,null,null,null,null,null,null],
       [null,null,null,null,null,null,null,null],
-      [null,null,null,null,null,null,null,null],
-      [null,null,null,null,null,null,null,null],
-      [null,null,null,null,null,null,null,null],
-      [null,null,'B','Q',null,null,null,null], // row 7: c3 bishop [7,2], d1 queen [7,3]
+      [null,null,null,null,'K',null,null,null], // e1 (white king)
     ],
-    instruction:'Scholar\'s Mate! Move the queen from d1 to f7!',
+    instruction:'Scholar\'s Mate! Move the queen from h5 to f7!',
     action:'move_piece',
-    expectFrom:[7,3], expectTo:[1,5],
+    expectFrom:[3,7], expectTo:[1,5],
     successMsg:'🎓 SCHOLAR\'S MATE! You\'ve mastered one of the most famous checkmates in chess!'
   }
 ];
